@@ -7,7 +7,9 @@ This repository contains code and antibody sequence data from our Cell manuscrip
   
 ### getting started  
   
-If you're new to Python, a great first step is to install the [Anaconda Python distribution](https://www.continuum.io/downloads), which includes pip as well as a ton of useful scientific Python packages. Working with GitHub repositories is also much easier if you have [git](https://git-scm.com/) installed.  
+If you just want to see the code and figures, click on `figure_code.ipynb` and Github will render the notebook for you. Although you can't change/run any of the code yourself, you can see the code and the resulting figures.  
+  
+Actually running the code yourself takes a few more steps. If you're new to Python, a great first step is to install the [Anaconda Python distribution](https://www.continuum.io/downloads), which includes pip as well as a ton of useful scientific Python packages. Working with GitHub repositories is also much easier if you have [git](https://git-scm.com/) installed.  
   
 After you've installed git and Anaconda, you need to clone this repository and install some additional Python dependencies:  
   `git clone https://github.com/briney/VRC01gH-GT3/`  
