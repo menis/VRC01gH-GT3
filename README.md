@@ -16,6 +16,8 @@ After you've installed git and Anaconda, you need to clone this repository and i
   `cd VRC01gH-GT3`  
   `pip install -r requirements.txt`  
   
+Finally, you need to install [MUSCLE](http://www.drive5.com/muscle/index.htm), which we use to perform multiple sequence alignments.  
+  
 Now all that's left to do is start Jupyter Notebook, which will open a browser window:  
 `jupyter notebook`  
   
