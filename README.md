@@ -2,7 +2,11 @@
   
 ### about  
   
-This repository contains code and antibody sequence data from our Cell manuscript: "Tailored immunogens direct affinity maturation toward HIV neutralizing antibodies."
+This repository contains code and antibody sequence data from our Cell manuscript: "Tailored immunogens direct affinity maturation toward HIV neutralizing antibodies." 
+  
+  
+### sequences
+Sequences described in the manuscript are avalable as FASTA files in the `fastas` directory.
   
   
 ### getting started  
