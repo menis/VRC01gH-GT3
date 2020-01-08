@@ -32,7 +32,7 @@ from matplotlib.ticker import AutoMinorLocator
 
 def shared_mutation_2dhist(x, y, cmap, ax, figfile=None, figsize=None, figsize_denom=4, n_levels=10, alpha=1.0, x_lim=(0, 19), y_lim=(0, 12),
                            y_label='VRC01-class mutations', x_label='Total amino acid mutations', labelsize=14,
-                           tick_labelsize=12, pad=-4, show_values=True):
+                           tick_labelsize=12, pad=4, show_values=True):
     # adjust the inputs to make them iterable
     if type(x[0]) in [int, float, np.int64, np.float64]:
         x = [x]
@@ -45,12 +45,12 @@ def shared_mutation_2dhist(x, y, cmap, ax, figfile=None, figsize=None, figsize_d
         bin_y = max(_y) + 2 if y_lim is None else y_lim[1] + 2
         bins = [[i - 0.5 for i in range(bin_y)], [i - 0.5 for i in range(bin_x)]]
         data, x_edges, y_edges = np.histogram2d(_y, _x, bins=bins)
-        data = data[::-1]
+        data = data[::1]
         if figsize is None:
             figsize = (float(bin_x) / figsize_denom, float(bin_y) / figsize_denom)
         mask = np.array([[val == 0 for val in subl] for subl in data])
         ax = sns.heatmap(data, cmap=_cmap, square=True, cbar=False, mask=mask,
-                         linewidths=1, linecolor='w', alpha=alpha)
+                         linewidths=1, linecolor='w', alpha=alpha, annot=True)
     if x_lim is None:
         x_lim = [0, len(data[0])]
     else:
@@ -91,9 +91,10 @@ def shared_mutation_2dhist(x, y, cmap, ax, figfile=None, figsize=None, figsize_d
     plt.ylabel(y_label, size=labelsize)
     plt.xlabel(x_label, size=labelsize)
     ax.xaxis.set_tick_params(which='major', direction='out', length=3,
-                             color='k', width=1, top='off', pad=pad)
+                             color='k', width=1, bottom=True, pad=pad)
+
     ax.yaxis.set_tick_params(which='major', direction='out', length=3,
-                             color='k', width=1, top='off', pad=pad)
+                             color='k', width=1, left=True, pad=pad)
 
 
 def pixel_plot(data, cmap, figfile=None, pad=2, labelsize=14, tight_layout=True,
