@@ -24,13 +24,13 @@
 
 
 import numpy as np
-
+np.set_printoptions(suppress=True)
 import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 
 
-def shared_mutation_2dhist(x, y, cmap, ax, figfile=None, figsize=None, figsize_denom=4, n_levels=10, alpha=1.0, x_lim=(0, 19), y_lim=(0, 12),
+def shared_mutation_2dhist(x, y, cmap, ax, figfile=None, figsize=None, figsize_denom=4, n_levels=10, alpha=1.0, x_lim=(0, 14), y_lim=(0, 14),
                            y_label='VRC01-class mutations', x_label='Total amino acid mutations', labelsize=14,
                            tick_labelsize=12, pad=4, show_values=True):
     # adjust the inputs to make them iterable
@@ -50,7 +50,7 @@ def shared_mutation_2dhist(x, y, cmap, ax, figfile=None, figsize=None, figsize_d
             figsize = (float(bin_x) / figsize_denom, float(bin_y) / figsize_denom)
         mask = np.array([[val == 0 for val in subl] for subl in data])
         ax = sns.heatmap(data, cmap=_cmap, square=True, cbar=False, mask=mask,
-                         linewidths=1, linecolor='w', alpha=alpha, annot=True)
+                         linewidths=1, linecolor='w', alpha=alpha, annot=True, fmt=".0f")
     if x_lim is None:
         x_lim = [0, len(data[0])]
     else:

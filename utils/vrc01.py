@@ -29,16 +29,25 @@ from abtools.alignment import global_alignment, muscle
 from abtools.sequence import Sequence
 
 
-def vrc01_class_mutation_count(seqs):
+def vrc01_class_mutation_count(seqs, expanded=False):
     input_seqs = [Sequence([s['seq_id'], s['vdj_aa']]) for s in seqs]
+    #print(input_seqs)
     shared = []
     total = []
     # get VRC01-class sequences
-    vrc01_seqs = get_vrc01_class_sequences()
+    vrc01_seqs = get_vrc01_class_sequences(vgene_only=True)
+    if expanded:
+
+        vrc01_seqs = get_expanded_vrc01_class_sequences(vgene_only=True)
+
     vrc01_names = [s.id for s in vrc01_seqs]
     # get glVRC01 sequence
-    glvrc01 = get_vrc01_germline_sequence()
+    glvrc01 = get_vrc01_germline_sequence(vgene_only=True)
     glvrc01_name = glvrc01.id
+
+    import re
+    regex = re.compile("[a-zA-Z]")
+
     # identify VRC01-class mutations
     for s in input_seqs:
         alignment_seqs = [s] + vrc01_seqs + [glvrc01]
@@ -46,6 +55,17 @@ def vrc01_class_mutation_count(seqs):
         aln_seq = [seq for seq in aln if seq.id == s.id][0]
         aln_gl = [seq for seq in aln if seq.id == glvrc01_name][0]
         aln_vrc01s = [seq for seq in aln if seq.id in vrc01_names]
+
+        # Strip '-' off the front of strings based on input string
+        # match = re.search(regex,str(aln_seq.seq))
+        index = [m.start() for m in re.finditer(regex, str(aln_seq.seq))]
+        # Logic if no match is found...
+        if (len(index) > 1):
+            aln_seq.seq = aln_seq.seq[index[0]:index[len(index) - 1]]
+            aln_gl.seq = aln_gl.seq[index[0]:index[len(index) - 1]]
+            for p in aln_vrc01s:
+                p.seq = p.seq[index[0]:index[len(index) - 1]]
+
         total.append(sum([_s != g for _s, g in zip(str(aln_seq.seq), str(aln_gl.seq)) if g != '-']))
         all_shared = {}
         for vrc01 in aln_vrc01s:
@@ -137,12 +157,54 @@ def get_vrc01_class_sequences(chain='heavy', vgene_only=True, only_include=None)
         seqs = [s for s in seqs if s[0] in only_include]
     return [Sequence(s) for s in seqs]
 
+def get_expanded_vrc01_class_sequences(chain='heavy', vgene_only=True, only_include=None):
+    if vgene_only:
+        heavy = [('VRC01', 'QVQLVQSGGQMKKPGESMRISCRASGYEFIDCTLNWIRLAPGKRPEWMGWLKPRGGAVNYARPLQGRVTMTRDVYSDTAFLELRSLTVDDTAVYFCTR'),
+                 ('PGV04', 'QVQLVQSGSGVKKPGASVRVSCWTSEDIFERTELIHWVRQAPGQGLEWIGWVKTVTGAVNFGSPDFRQRVSLTRDRDLFTAHMDIRGLTQGDTATYFCAR'),
+                 ('VRC-CH31', 'QVQLVQSGAAVRKPGASVTVSCKFAEDDDYSPYWVNPAPEHFIHFLRQAPGQQLEWLAWMNPTNGAVNYAWYLNGRVTATRDRSMTTAFLEVKSLRSDDTAVYYCAR'),
+                 ('3BNC60', 'QVHLSQSGAAVTKPGASVRVSCEASGYKISDHFIHWWRQAPGQGLQWVGWINPKTGQPNNPRQFQGRVSLTRQASWDFDTYSFYMDLKAVRSDDTAIYFCAR'),
+                 ('12A12', 'HLVQSGTQVKKPGASVRISCQASGYSFTDYVLHWWRQAPGQGLEWMGWIKPVYGARNYARRFQGRINFDRDIYREIAFMDLSGLRSDDTALYFCAR'),
+                 ('PGV20', 'QVHLMQSGTEMKKPGASVRVTCQTSGYTFSDYFIHWLRQVPGRGFEWMGWMNPQWGQVNYARTFQGRVTMTRDVYREVAYLDLRSLTFADTAVYFCAR'),
+                 ('3BNC117', 'QVQLLQSGAAVTKPGASVRVSCEASGYNIRDYFIHWWRQAPGQGLQWVGWINPKTGQPNNPRQFQGRVSLTRHASWDFDTFSFYMDLKALRSDDTAVYFCAR'),
+                 ('12A21','SQHLVQSGTQVKKPGASVRVSCQASGYTFTNYILHWWRQAPGQGLEWMGLIKPVFGAVNYARQFQGRIQLTRDIYREIAFLDLSGLRSDDTAVYYCAR'),
+                 ('C38-VRC18.02','EVRLVQSGNQVRKPGASVRISCEASGYKFIDHFIHWVRQVPGHGLEWLGWINPRGGGVNYSRSFQGKLSMTMTRDNFEETAYLDLSKLNPGDTAVYFCAR'),
+                 ('N6','RAHLVQSGTAMKKPGASVRVSCQTSGYTFTAHILFWFRQAPGRGLEWVGWIKPQYGAVNFGGGFRDRVTLTRDVYREIAYMDIRGLKPDDTAVYYCAR'),
+                 ('N49P7','ADLVQSGAVVKKPGDSVRISCEAQGYRFPDYIIHWIRRAPGQGPEWMGWMNPMGGQVNIPWKFQGRVSMTRDTSIETAFLDLRGLKSDDTAVYYCVR'),
+                 ('N60P25.1','HVQLVQSGTEVKRPGASVRISCASSGYTFSNYFIHWVRQAPGRGLEWMGWMNPLRGAVNYSGKFQGRVTMTRDIYTETSFMVLSGLRSDDTAIYFCAR'),
+                 ('NIH45-46','QVRLSQSGGQMKKPGESMRLSCRASGYEFLNCPINWIRLAPGRRPEWMGWLKPRGGAVNYARKFQGRVTMTRDVYSDTAFLELRSLTSDDTAVYFCTR'),
+                 ('PCIN63-71I','QVQLVQSGVAVKKPGASVWVSCKASGYTFTSCYIHWFRQAPGQGLEWMGWLNPINGARNNPYQFQGRISLTRDTSSETAYLELRNLRSDDTAVYYCAR'),
+                 ('VRC02','QVQLVQSGGQMKKPGESMRISCQASGYEFIDCTLNWVRLAPGRRPEWMGWLKPRGGAVNYARPLQGRVTMTRDVYSDTAFLELRSLTADDTAVYYCTR'),
+                 ('VRC07','QVRLSQSGGQMKKPGDSMRISCRASGYEFINCPINWIRLAPGKRPEWMGWMKPRGGAVSYARQLQGRVTMTRDMYSETAFLELRSLTSDDTAVYFCTR'),
+                 ('VRC08','QVQLVQSGTQMKEPGASVTISCVTSGYEFVEILINWVRQVPGRGLEWMGWMNPRGGGVNYARQFQGKVTMTRDVYRDTAYLTLSGLTSGDTAKYFCVR'),
+                 ('VRC27','SQRLVQSGPQVRKPGSSVRISCETSGYTFNAYILHWFRQAPGRSFEWMGWIKPKFGAVNYAHSFQGRITLTRDIYRETAFLDLTGLRFDDTAVYYCAR'),
+                 ('VRC-PG19','EVRLVQSGAEVKKPGASVRVSCAASGYTFTDFDIHWLRQAPGRGLEWMGWVRPLGGGVSYARQFQGRVTMTRDFYIDTAFMDFRNLKMDDTALYFCAR')]
+        light = []
+    else:
+        heavy = [('VRC01', 'QVQLVQSGGQMKKPGESMRISCRASGYEFIDCTLNWIRLAPGKRPEWMGWLKPRGGAVNYARPLQGRVTMTRDVYSDTAFLELRSLTVDDTAVYFCTRGKNCDYNWDFEHWGRGTPVIVSS'),
+                 ('PGV04', 'QVQLVQSGSGVKKPGASVRVSCWTSEDIFERTELIHWVRQAPGQGLEWIGWVKTVTGAVNFGSPDFRQRVSLTRDRDLFTAHMDIRGLTQGDTATYFCARQKFYTGGQGWYFDLWGRGTLIVVSS'),
+                 ('VRC-CH31', 'QVQLVQSGAAVRKPGASVTVSCKFAEDDDYSPYWVNPAPEHFIHFLRQAPGQQLEWLAWMNPTNGAVNYAWYLNGRVTATRDRSMTTAFLEVKSLRSDDTAVYYCARAQKRGRSEWAYAHWGQGTPVVVSS'),
+                 ('3BNC60', 'QVHLSQSGAAVTKPGASVRVSCEASGYKISDHFIHWWRQAPGQGLQWVGWINPKTGQPNNPRQFQGRVSLTRQASWDFDTYSFYMDLKAVRSDDTAIYFCARQRSDFWDFDVWGSGTQVTVSS'),
+                 ('12A12', 'HLVQSGTQVKKPGASVRISCQASGYSFTDYVLHWWRQAPGQGLEWMGWIKPVYGARNYARRFQGRINFDRDIYREIAFMDLSGLRSDDTALYFCARDGSGDDTSWHLDPWGQGTLVIVSA'),
+                 ('PGV20', 'QVHLMQSGTEMKKPGASVRVTCQTSGYTFSDYFIHWLRQVPGRGFEWMGWMNPQWGQVNYARTFQGRVTMTRDVYREVAYLDLRSLTFADTAVYFCARRMRSQDREWDFQHWGQGTRIIVSS')]
+        light = []
+    seqs = heavy if chain == 'heavy' else light
+    if only_include is not None:
+        if type(only_include) in [str, unicode]:
+            only_include = [only_include, ]
+        seqs = [s for s in seqs if s[0] in only_include]
+    return [Sequence(s) for s in seqs]
+
+
 
 def get_vrc01_class_mutations():
     vrc01_class = [s.sequence for s in get_vrc01_class_sequences()]
     glvrc01 = get_vrc01_germline_sequence().sequence
     return list(set(_get_mutations(vrc01_class, glvrc01)))
 
+def get_expanded_vrc01_class_mutations():
+    vrc01_class = [s.sequence for s in get_expanded_vrc01_class_sequences()]
+    glvrc01 = get_vrc01_germline_sequence().sequence
+    return list(set(_get_mutations(vrc01_class, glvrc01)))
 
 def _get_mutations(seqs, standard):
     mutations = []
